@@ -14,6 +14,10 @@ JQElement.prototype.open = function() {
 	self.$.attr('data-status','opened');
 	self.$.text(self.number);
 };
+JQElement.prototype.check = function(){
+	var self = this;
+	self.$.css('background','gray');
+}
 JQElement.prototype.bomb = function() {
 	var self = this;
 	self.$.css('background','red');
@@ -28,7 +32,7 @@ JQElement.prototype.setNumber = function(number){
 JQElement.prototype.mark = function() {
 	var self = this;
 	self.$.attr('data-status','marked');
-	self.$.css('background','black');
+	self.$.css('background','gold');
 };
 JQElement.prototype.unmark = function() {
 	var self = this;
@@ -49,7 +53,7 @@ JQElement.prototype.assignRightClickHandler = function(rightClickHandler, block)
 	});
 }
 
-function Block ( i, j, isMine, neighbors ) {
+function Block ( i, j, isMine ) {
 	var self = this;
 	//private variables
 	var _j = j;
@@ -71,17 +75,18 @@ function Block ( i, j, isMine, neighbors ) {
 Block.prototype.setNeighbors = function( neighbors ){
 	var self = this;
 	self.neighbors = neighbors;
-	for( var __item in self.neighbors ){
-		if( self.neighbors[__item] && self.neighbors[__item].isMine ) self.number++;
-	}
+	if(self.isMine) self.number = -1;
+	else
+		for( var __item in self.neighbors )
+			if( self.neighbors[__item] && self.neighbors[__item].isMine ) self.number++;
 	// console.log(self.number);
 	self.jQElement.setNumber(self.number);
 }
 Block.prototype.open = function() {
 	var self = this;
 	// console.log(self.isMine);
-	if(self.isMine){
-		self.jQElement.bomb();
+	if(self.isMine && self.status == 'closed'){
+		self.board.gameover();
 	}else{
 		if(self.status == 'closed'){
 			self.status = 'opened';
@@ -93,6 +98,17 @@ Block.prototype.open = function() {
 		}
 	}
 };
+Block.prototype.gameover = function(){
+	var self = this;
+	// console.log(self);
+	if(self.isMine && self.status != 'marked'){
+		self.jQElement.bomb();
+	}else if(!self.isMine){
+		self.jQElement.open();
+		if(self.status == 'marked')
+			self.jQElement.check();
+	}
+}
 Block.prototype.getJQElementLeftClickHandler = function(){
 	return function leftClickHandler(self){
 		var _i = $(this).attr('data-i');
@@ -130,11 +146,12 @@ Block.prototype.mark = function() {
 function Board(data, $container){
 	var blocks = [];
 	var _$container = $container;
+	Block.prototype.board=this;
 	this.init = function init(){
 		for (var i = 0; i < data.length; i++) {
 			blocks[i] = [];
 			for (var j = 0; j < data[i].length; j++) {
-				blocks[i][j] = new Block( i, j, data[i][j], neighbors);
+				blocks[i][j] = new Block( i, j, data[i][j]);
 				_$container.append(blocks[i][j].jQElement.$);
 			}
 		}
@@ -152,6 +169,13 @@ function Board(data, $container){
 				}
 				if(i==2&&j==3)console.log(neighbors)
 				blocks[i][j].setNeighbors( neighbors );
+			}
+		}
+	}
+	this.gameover = function gameover(){
+		for (var i = 0; i < blocks.length; i++) {
+			for (var j = 0; j < blocks[i].length; j++) {
+				blocks[i][j].gameover();
 			}
 		}
 	}
