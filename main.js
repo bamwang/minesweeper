@@ -29,5 +29,6 @@ var testData = [
 
 $(function () {
 	// var board = new Board(testData);
-	Board(testData)
+	board = new Board(testData, $('#board'));
+	board.init();
 })

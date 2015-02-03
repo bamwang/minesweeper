@@ -1,71 +1,158 @@
-function Block ( i, j, data ) {
+
+
+function JQElement (i, j, status){
 	var self = this;
-	var j = j;
-	var i = i;
-	var isMine = data[i][j];
-	var number = 0;
+	self.number = 0;
+	self.$ = $('<div class="block" data-i=' + i + ' data-j=' + j + ' data-status='+ status +'>');
+}
+JQElement.prototype.open = function() {
+	var self = this;
+	// console.log('jQElement open');
+	// console.log(self.$);
+	// console.log(self.number);
+	self.$.css('background','white');
+	self.$.attr('data-status','opened');
+	self.$.text(self.number);
+};
+JQElement.prototype.bomb = function() {
+	var self = this;
+	self.$.css('background','red');
+	self.$.attr('data-status','over');
+	// self.$.text(self.number);
+};
+JQElement.prototype.setNumber = function(number){
+	var self = this;
+	self.number = number;
+	// console.log(self.number);
+}
+JQElement.prototype.mark = function() {
+	var self = this;
+	self.$.attr('data-status','marked');
+	self.$.css('background','black');
+};
+JQElement.prototype.unmark = function() {
+	var self = this;
+	self.$.attr('data-status','closed');
+	self.$.css('background','');
+};
+JQElement.prototype.assignLeftClickHandler = function(leftClickHandler, block) {
+	var self = this;
+	self.$.on('click',function(){
+		leftClickHandler(block);
+	});
+}
+JQElement.prototype.assignRightClickHandler = function(rightClickHandler, block) {
+	var self = this;
+	self.$.on('contextmenu',function(){
+		event.preventDefault();
+		rightClickHandler(block);
+	});
+}
+
+function Block ( i, j, isMine, neighbors ) {
+	var self = this;
+	//private variables
+	var _j = j;
+	var _i = i;
+	var _jQElementLeftClickHandler = self.getJQElementLeftClickHandler();
+	var _jQElementRightClickHandler = self.getJQElementRightClickHandler();
+
+	//public variables
+	self.number = 0;
+	self.isMine = isMine;
 	self.status = 'closed';
-	var neighbors={
-		west : (j>0) ? data[i][j-1] : false,
-		northWest : (j>0 && i>0) ? data[i-1][j-1] : false,
-		north : (i>0) ? data[i-1][j] : false,
-		northEast : (i>0 && j<data[0].length-1) ? data[i-1][j+1] : false,
-		east : (j<data[0].length-1) ? data[i][j+1] : false,
-		southEast : (j<data[0].length-1 && i<data.length-1) ? data[i+1][j+1] : false,
-		south : (i<data.length-1) ? data[i+1][j] : false,
-		southWest : (j>0 && i<data.length-1) ? data[i+1][j-1] : false,
+	self.neighbors = {};
+	self.jQElement = new JQElement(_i, _j, self.status);
+	//init
+	// console.log(self.jQElement);
+	self.jQElement.assignLeftClickHandler( _jQElementLeftClickHandler, self );
+	self.jQElement.assignRightClickHandler( _jQElementRightClickHandler, self );
+}
+Block.prototype.setNeighbors = function( neighbors ){
+	var self = this;
+	self.neighbors = neighbors;
+	for( var __item in self.neighbors ){
+		if( self.neighbors[__item] && self.neighbors[__item].isMine ) self.number++;
 	}
-	for( var item in neighbors ){
-		if( neighbors[item] ) number++;
-	}
-	self.$element = $('<div class="block" data-i=' + i + ' data-j=' + j + ' data-status=closed>');
-	self.$element.on('click',function(){
-		if( $(this).attr('data-status')=='closed' ){
-			// console.log(neighbors);
-			$(this).attr('data-status','open');
-			self.open();
-		}else{
-			// console.log(i,j)
-		}
-	})
-	self.open = function open(){
-		// console.log(isMine);
-		if(isMine){
-			// console.log($element);
-			self.$element.parent().children('div[data-status=closed]').click();
-			self.$element.css('background','red');
-		}else{
-			self.$element.css('background','white');
-			self.$element.text(number);
-			if(number==0){
-				self.$element.parent().children('div[data-i=' + (i-1) + '][data-j=' + (j-1) + '][data-status=closed]').css('background','yellow').click();
-				self.$element.parent().children('div[data-i=' + (i-1) + '][data-j=' + (j+1) + '][data-status=closed]').css('background','yellow').click();
-				self.$element.parent().children('div[data-i=' + (i+1) + '][data-j=' + (j-1) + '][data-status=closed]').css('background','yellow').click();
-				self.$element.parent().children('div[data-i=' + (i+1) + '][data-j=' + (j+1) + '][data-status=closed]').css('background','yellow').click();
-				self.$element.parent().children('div[data-i=' + (i) + '][data-j=' + (j-1) + '][data-status=closed]').css('background','yellow').click();
-				self.$element.parent().children('div[data-i=' + (i) + '][data-j=' + (j+1) + '][data-status=closed]').css('background','yellow').click();
-				self.$element.parent().children('div[data-i=' + (i-1) + '][data-j=' + (j) + '][data-status=closed]').css('background','yellow').click();
-				self.$element.parent().children('div[data-i=' + (i+1) + '][data-j=' + (j) + '][data-status=closed]').css('background','yellow').click();
+	// console.log(self.number);
+	self.jQElement.setNumber(self.number);
+}
+Block.prototype.open = function() {
+	var self = this;
+	// console.log(self.isMine);
+	if(self.isMine){
+		self.jQElement.bomb();
+	}else{
+		if(self.status == 'closed'){
+			self.status = 'opened';
+			// console.log('to open');
+			self.jQElement.open();
+			if(self.number == 0){
+				self.openNeighbors();
 			}
 		}
 	}
-	self.$element.on('contextmenu',function(){
-		event.preventDefault();
-		if($(this).attr('data-status')=='mine'){
-			$(this).css('background','').attr('data-status','closed');	
-		}else{
-			$(this).css('background','black').attr('data-status','mine');	
-		}
-
-	})
+};
+Block.prototype.getJQElementLeftClickHandler = function(){
+	return function leftClickHandler(self){
+		var _i = $(this).attr('data-i');
+		var _j = $(this).attr('data-j');
+		// console.log(self);
+		self.open();
+	};
 }
+Block.prototype.getJQElementRightClickHandler = function(){
+	return function rightClickHandler(self){
+		var _i = $(this).attr('data-i');
+		var _j = $(this).attr('data-j');
+		self.mark();
+	};
+}
+Block.prototype.openNeighbors = function() {
+	var self = this;
+	for( var __item in self.neighbors ){
+		if( self.neighbors[__item] && self.neighbors[__item].status == 'closed' ) self.neighbors[__item].open();
+	}
+};
+Block.prototype.mark = function() {
+	var self = this;
+	if( self.status == 'closed' ){
+		self.status = 'marked';
+		self.jQElement.mark();
+	}
+	else{
+		self.status = 'closed';
+		self.jQElement.unmark();
+	}
+};
 
-function Board(data){
-	this.blocks = [];
-	for (var i = 0; i < data.length; i++) {
-		for (var j = 0; j < data[i].length; j++) {
-			var block = new Block(i,j,data);
-			$('#board').append(block.$element);
+
+function Board(data, $container){
+	var blocks = [];
+	var _$container = $container;
+	this.init = function init(){
+		for (var i = 0; i < data.length; i++) {
+			blocks[i] = [];
+			for (var j = 0; j < data[i].length; j++) {
+				blocks[i][j] = new Block( i, j, data[i][j], neighbors);
+				_$container.append(blocks[i][j].jQElement.$);
+			}
+		}
+		for (var i = 0; i < data.length; i++) {
+			for (var j = 0; j < data[i].length; j++) {
+				var neighbors = {
+					west : (j>0) ? blocks[i][j-1] : undefined,
+					northWest : (j>0 && i>0) ? blocks[i-1][j-1] : undefined,
+					north : (i>0) ? blocks[i-1][j] : undefined,
+					northEast : (i>0 && j<data[0].length-1) ? blocks[i-1][j+1] : undefined,
+					east : (j<data[0].length-1) ? blocks[i][j+1] : undefined,
+					southEast : (j<data[0].length-1 && i<data.length-1) ? blocks[i+1][j+1] : undefined,
+					south : (i<data.length-1) ? blocks[i+1][j] : undefined,
+					southWest : (j>0 && i<data.length-1) ? blocks[i+1][j-1] : undefined,
+				}
+				if(i==2&&j==3)console.log(neighbors)
+				blocks[i][j].setNeighbors( neighbors );
+			}
 		}
 	}
 }
