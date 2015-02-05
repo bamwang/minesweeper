@@ -7,22 +7,30 @@ function JQElement (i, j, status){
 }
 JQElement.prototype.open = function() {
 	var self = this;
-	// console.log('jQElement open');
-	// console.log(self.$);
-	// console.log(self.number);
 	self.$.css('background','white');
 	self.$.attr('data-status','opened');
 	self.$.text(self.number);
+	self.removeHandler();
 };
 JQElement.prototype.check = function(){
 	var self = this;
+	self.removeHandler();
 	self.$.css('background','gray');
 }
 JQElement.prototype.bomb = function() {
 	var self = this;
 	self.$.css('background','red');
 	self.$.attr('data-status','over');
+	self.removeHandler();
 	// self.$.text(self.number);
+};
+JQElement.prototype.removeHandler = function() {
+	var self = this;
+	self.$.off('contextmenu');
+	self.$.off('click');
+	self.$.on('contextmenu',function(){
+		event.preventDefault();
+	});
 };
 JQElement.prototype.setNumber = function(number){
 	var self = this;
@@ -86,12 +94,15 @@ Block.prototype.open = function() {
 	var self = this;
 	// console.log(self.isMine);
 	if(self.isMine && self.status == 'closed'){
+		self.status = 'open';
+		self.jQElement.bomb();
 		self.board.gameover();
 	}else{
 		if(self.status == 'closed'){
 			self.status = 'opened';
 			// console.log('to open');
 			self.jQElement.open();
+			self.board.open();
 			if(self.number == 0){
 				self.openNeighbors();
 			}
@@ -101,13 +112,18 @@ Block.prototype.open = function() {
 Block.prototype.gameover = function(){
 	var self = this;
 	// console.log(self);
-	if(self.isMine && self.status != 'marked'){
-		self.jQElement.bomb();
-	}else if(!self.isMine){
+	if(self.isMine && self.status == 'closed'){
 		self.jQElement.open();
-		if(self.status == 'marked')
-			self.jQElement.check();
+	}else if(!self.isMine && self.status == 'marked'){
+		self.jQElement.check();
+	}else{
+		self.jQElement.removeHandler();
 	}
+}
+Block.prototype.win = function(){
+	var self = this;
+	if(self.status == 'closed' || self.status == 'marked')
+		self.jQElement.removeHandler();
 }
 Block.prototype.getJQElementLeftClickHandler = function(){
 	return function leftClickHandler(self){
@@ -135,42 +151,57 @@ Block.prototype.mark = function() {
 	if( self.status == 'closed' ){
 		self.status = 'marked';
 		self.jQElement.mark();
+		self.board.mark(1);
 	}
 	else{
 		self.status = 'closed';
 		self.jQElement.unmark();
+		self.board.mark(-1);
 	}
 };
 
 
 function Board(data, $container){
 	var blocks = [];
+	var blockData = data.blockData;
+	var _numberOfMines = data.numberOfMines;
+	var _numberOfBlocks = data.numberOfBlocks;
+	var _numberOfSafeBlock = _numberOfBlocks - _numberOfMines;
+	var _numberOfOpenedBlock = 0;
+	var _numberOfMarks = 0;
 	var _$container = $container;
+	var _seconds = 0;
+	var _interval = undefined;
 	Block.prototype.board=this;
 	this.init = function init(){
-		for (var i = 0; i < data.length; i++) {
+		_$container.css({'width': blockData[0].length * 24});
+		for (var i = 0; i < blockData.length; i++) {
 			blocks[i] = [];
-			for (var j = 0; j < data[i].length; j++) {
-				blocks[i][j] = new Block( i, j, data[i][j]);
+			for (var j = 0; j < blockData[i].length; j++) {
+				blocks[i][j] = new Block( i, j, blockData[i][j]);
 				_$container.append(blocks[i][j].jQElement.$);
 			}
 		}
-		for (var i = 0; i < data.length; i++) {
-			for (var j = 0; j < data[i].length; j++) {
+		for (var i = 0; i < blockData.length; i++) {
+			for (var j = 0; j < blockData[i].length; j++) {
 				var neighbors = {
 					west : (j>0) ? blocks[i][j-1] : undefined,
 					northWest : (j>0 && i>0) ? blocks[i-1][j-1] : undefined,
 					north : (i>0) ? blocks[i-1][j] : undefined,
-					northEast : (i>0 && j<data[0].length-1) ? blocks[i-1][j+1] : undefined,
-					east : (j<data[0].length-1) ? blocks[i][j+1] : undefined,
-					southEast : (j<data[0].length-1 && i<data.length-1) ? blocks[i+1][j+1] : undefined,
-					south : (i<data.length-1) ? blocks[i+1][j] : undefined,
-					southWest : (j>0 && i<data.length-1) ? blocks[i+1][j-1] : undefined,
+					northEast : (i>0 && j<blockData[0].length-1) ? blocks[i-1][j+1] : undefined,
+					east : (j<blockData[0].length-1) ? blocks[i][j+1] : undefined,
+					southEast : (j<blockData[0].length-1 && i<blockData.length-1) ? blocks[i+1][j+1] : undefined,
+					south : (i<blockData.length-1) ? blocks[i+1][j] : undefined,
+					southWest : (j>0 && i<blockData.length-1) ? blocks[i+1][j-1] : undefined,
 				}
 				if(i==2&&j==3)console.log(neighbors)
 				blocks[i][j].setNeighbors( neighbors );
 			}
 		}
+		_interval = setInterval(function(){
+			_seconds++;
+			console.log(_seconds);
+		},1000);
 	}
 	this.gameover = function gameover(){
 		for (var i = 0; i < blocks.length; i++) {
@@ -178,5 +209,22 @@ function Board(data, $container){
 				blocks[i][j].gameover();
 			}
 		}
+		clearInterval(_interval);
+	}
+	this.open = function open(){
+		_numberOfOpenedBlock++;
+		if( _numberOfOpenedBlock == _numberOfSafeBlock ){
+			alert('win');
+			clearInterval(_interval);
+			for (var i = 0; i < blocks.length; i++) {
+				for (var j = 0; j < blocks[i].length; j++) {
+					blocks[i][j].win();
+				}
+			}
+		}
+	}
+	this.mark = function mark(n){
+		_numberOfMarks+=n;
+		console.log('remain mines',  _numberOfMines-_numberOfMarks);
 	}
 }

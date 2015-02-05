@@ -5,17 +5,30 @@
 	<script type="text/javascript" src="main.js"></script>
 	<style type="text/css">
 	div#board {
-	    width: 110px;
-	    height: 110px;
 	    display: block;
+	    background: gray;
+	    cursor: default;
+	    padding: 2px;
+	}
+	div#board:after   {  
+	    content: ".";  
+	    display: block;  
+	    visibility: hidden;  
+	    height: 0.1px;  
+	    font-size: 0.1em;  
+	    line-height: 0;  
+	    clear: both;  
 	}
 
 	.block {
 	    display: block;
 	    width: 20px;
 	    height: 20px;
-	    border: 1px solid black;
-	    float: left;
+	    margin: 2px;
+	    /*border: 1px solid black;*/
+	    float: left; 
+		background: #ddd;
+		border-radius: 2px;
 	}
 	</style>
 </head>
