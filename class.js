@@ -227,7 +227,7 @@ function Board($container){
 		var mineKeys = generateMineKeys(width, height, numberOfMines);
 		for (var i = 0; i < height; i++) {
 				blockData[i] = [];
-			for (var j = 0; j < height; j++) {
+			for (var j = 0; j < width; j++) {
 				if(mineKeys[i * width + j])
 					blockData[i][j]=true;
 				else
@@ -245,6 +245,7 @@ function Board($container){
 	self.init = function init(config){
 		_config = config;
 		_data = generateData(config.width, config.height, config.numberOfMines);
+		// console.log(_data)
 		_blockData = _data.blockData;
 		_numberOfMines = _data.numberOfMines;
 		_numberOfBlocks = _data.numberOfBlocks;
@@ -285,6 +286,7 @@ function Board($container){
 		},1000);
 	}
 	self.gameover = function gameover(){
+		_$button.addClass('over');
 		for (var i = 0; i < blocks.length; i++) {
 			for (var j = 0; j < blocks[i].length; j++) {
 				blocks[i][j].gameover();
@@ -309,13 +311,15 @@ function Board($container){
 		_$count.text(_numberOfMines-_numberOfMarks);
 	}
 	self.destroy = function destroy(){
+		_$button.removeClass('over');
 		_blockData = null;
 		clearInterval(_interval);
 		_$field.html('');
 	}
-	self.reset = function reset(){
+	self.reset = function reset(config){
+		var config = config ? config : _config;
 		self.destroy();
-		self.init(_config);
+		self.init(config);
 	}
 	_$button.on('click', function(){
 		self.reset();

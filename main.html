@@ -4,8 +4,38 @@
 	<script type="text/javascript" src="class.js"></script>
 	<script type="text/javascript" src="main.js"></script>
 	<style type="text/css">
+	body{
+		background: #eee;
+	}
 	div#wrapper {
 	   width: 100%;
+	}
+	div#controller {
+	    width: 340px;
+	    display: block;
+	    margin: 20px auto;
+	}
+
+	form input {
+	    width: 80px;
+	    text-align: center;
+	    font-size: 20px;
+	    line-height: 20px;
+	    display: block;
+	    float: left;
+    	border-radius: 3px;
+	    height: 27px;
+	    background: #ddd;
+	    border: none;
+	    margin: 2px;
+	}
+	form input[type=submit]{
+		/*padding: 15px 40px;*/
+    	/*font-size: 1.2em;*/
+    	/*background-color: #000;*/
+    	/*color: #fff;*/
+    	border-style: none;
+		border-bottom: #bbb 2px solid;
 	}
 	div#board #field {
 	    display: block;
@@ -13,6 +43,7 @@
 	    cursor: default;
 	    padding: 2px;
 	}
+
 
 	div#board #bar{
 		height: 25px;
@@ -44,15 +75,22 @@
 		border-radius: 3px;
 	}
 	div#board #button{
-		/*float: left;*/
 		margin: auto;
-		width: 50px;
+		width: 24px;
 		padding: 2px;
 		text-align: center;
 		background: #ddd;
 		border-bottom: #bbb 2px solid;
 		border-radius: 3px;
-		cursor:	pointer;
+		cursor: pointer;
+		font-size: 20px;
+		line-height: 24px;
+		background-image: url(face_normal.png);
+		background-size: 28px;
+		height: 24px;
+	}
+	div#board #button.over{
+		background-image: url(face_over.png);
 	}
 
 	div#board{
@@ -117,22 +155,22 @@
 	.block.n_5{
 		background-image: url(number.png);
 		background-size: 166px;
-		background-position: -90px;
+		background-position: -92px;
 	}
 	.block.n_6{
 		background-image: url(number.png);
 		background-size: 166px;
-		background-position: -120px;
+		background-position: -111px;
 	}
 	.block.n_7{
 		background-image: url(number.png);
 		background-size: 166px;
-		background-position: -140px;
+		background-position: -130px;
 	}
 	.block.n_8{
 		background-image: url(number.png);
 		background-size: 166px;
-		background-position: -160px;
+		background-position: -148px;
 	}
 	.block.n_-1{
 		background-image: url(mine.png);
@@ -146,10 +184,18 @@
 </head>
 <body>
 	<div id="wrapper" class="clearfix">
+		<div id="controller" class="clearfix">
+			<form>
+				<input type="number" min="5" max="20" id="width" placeholder="width">
+				<input type="number" min="5" max="20" id="height" placeholder="height">
+				<input type="number" id="mines" placeholder="mine#">
+				<input type="submit" value="Go!">
+			</form>
+		</div>
 		<div id="board" class="clearfix">
 			<div id="bar" class="clearfix">
 				<div id="timer"></div>
-				<div id="button">again</div>
+				<div id="button"></div>
 				<div id="count"></div>
 			</div>
 			<div id="field" class="clearfix"></div>
