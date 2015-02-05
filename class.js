@@ -7,7 +7,14 @@ function JQElement (i, j, status){
 }
 JQElement.prototype.open = function() {
 	var self = this;
-	self.$.css('background','white');
+	self.$.addClass('open');
+	self.$.attr('data-status','opened');
+	self.$.addClass('n_'+self.number);
+	self.removeHandler();
+};
+JQElement.prototype.open2 = function() {
+	var self = this;
+	self.$.animate('background','yellow');
 	self.$.attr('data-status','opened');
 	self.$.text(self.number);
 	self.removeHandler();
@@ -15,11 +22,19 @@ JQElement.prototype.open = function() {
 JQElement.prototype.check = function(){
 	var self = this;
 	self.removeHandler();
-	self.$.css('background','gray');
+	self.$.addClass('wrong');
 }
 JQElement.prototype.bomb = function() {
 	var self = this;
-	self.$.css('background','red');
+	self.open();
+	self.$.addClass('bomb');
+	self.$.attr('data-status','over');
+	self.removeHandler();
+	// self.$.text(self.number);
+};
+JQElement.prototype.bomb2 = function() {
+	var self = this;
+	self.$.animate('background','pink');
 	self.$.attr('data-status','over');
 	self.removeHandler();
 	// self.$.text(self.number);
@@ -40,12 +55,12 @@ JQElement.prototype.setNumber = function(number){
 JQElement.prototype.mark = function() {
 	var self = this;
 	self.$.attr('data-status','marked');
-	self.$.css('background','gold');
+	self.$.addClass('mark');
 };
 JQElement.prototype.unmark = function() {
 	var self = this;
 	self.$.attr('data-status','closed');
-	self.$.css('background','');
+	self.$.removeClass('mark');
 };
 JQElement.prototype.assignLeftClickHandler = function(leftClickHandler, block) {
 	var self = this;
@@ -97,6 +112,7 @@ Block.prototype.open = function() {
 		self.status = 'open';
 		self.jQElement.bomb();
 		self.board.gameover();
+		// self.gameover2()
 	}else{
 		if(self.status == 'closed'){
 			self.status = 'opened';
@@ -118,6 +134,23 @@ Block.prototype.gameover = function(){
 		self.jQElement.check();
 	}else{
 		self.jQElement.removeHandler();
+	}
+}
+
+Block.prototype.gameover2 = function(){
+	var self = this;
+	// console.log(self);
+	if(self.isMine && self.status == 'closed'){
+		self.jQElement.bomb2();
+	}else if(!self.isMine && self.status == 'marked'){
+		self.jQElement.check();
+	}else{
+		self.jQElement.open2();
+		self.jQElement.removeHandler();
+	}
+	for( var __i in self.neighbors){
+		if(self.neighbors[__i])
+			self.neighbors[__i].gameover2()
 	}
 }
 Block.prototype.win = function(){
@@ -161,49 +194,97 @@ Block.prototype.mark = function() {
 };
 
 
-function Board(data, $container){
+function Board($container){
+	var _data = undefined;
+	var _config = undefined;
+	var _blockData= undefined;
+	var self = this;
 	var blocks = [];
-	var blockData = data.blockData;
-	var _numberOfMines = data.numberOfMines;
-	var _numberOfBlocks = data.numberOfBlocks;
-	var _numberOfSafeBlock = _numberOfBlocks - _numberOfMines;
-	var _numberOfOpenedBlock = 0;
-	var _numberOfMarks = 0;
 	var _$container = $container;
+	var _$field = _$container.find('#field');
+	var _$button = _$container.find('#button');
+	var _$timer = _$container.find('#timer');
+	var _$count = _$container.find('#count');
 	var _seconds = 0;
 	var _interval = undefined;
-	Block.prototype.board=this;
-	this.init = function init(){
-		_$container.css({'width': blockData[0].length * 24});
-		for (var i = 0; i < blockData.length; i++) {
-			blocks[i] = [];
-			for (var j = 0; j < blockData[i].length; j++) {
-				blocks[i][j] = new Block( i, j, blockData[i][j]);
-				_$container.append(blocks[i][j].jQElement.$);
+	Block.prototype.board=self;
+	
+	function generateMineKeys(width, height, numberOfMines){
+		var mineKeys = {};
+		var number = 0;
+		var total = width * height;
+		while(number < numberOfMines){
+			var key = Math.random() * total ^ 0;
+			if( mineKeys[key] == undefined ){
+				mineKeys[key] = true;
+				number++;
 			}
 		}
-		for (var i = 0; i < blockData.length; i++) {
-			for (var j = 0; j < blockData[i].length; j++) {
+		return mineKeys;
+	}
+	function generateData(width, height, numberOfMines){
+		var blockData = [];
+		var mineKeys = generateMineKeys(width, height, numberOfMines);
+		for (var i = 0; i < height; i++) {
+				blockData[i] = [];
+			for (var j = 0; j < height; j++) {
+				if(mineKeys[i * width + j])
+					blockData[i][j]=true;
+				else
+					blockData[i][j]=false;
+			}
+		}
+		var data = {
+			numberOfMines : numberOfMines,
+			numberOfBlocks : width * height,
+			blockData : blockData
+		}
+		return data;
+	}
+
+	self.init = function init(config){
+		_config = config;
+		_data = generateData(config.width, config.height, config.numberOfMines);
+		_blockData = _data.blockData;
+		_numberOfMines = _data.numberOfMines;
+		_numberOfBlocks = _data.numberOfBlocks;
+		_numberOfSafeBlock = _numberOfBlocks - _numberOfMines;
+		_numberOfOpenedBlock = 0;
+		_numberOfMarks = 0;
+		_seconds = 0;
+		_interval = undefined;
+		_$field.css({'width': _blockData[0].length * 24});
+		_$container.css({'width': _blockData[0].length * 24 + 4});
+		for (var i = 0; i < _blockData.length; i++) {
+			blocks[i] = [];
+			for (var j = 0; j < _blockData[i].length; j++) {
+				blocks[i][j] = new Block( i, j, _blockData[i][j]);
+				_$field.append(blocks[i][j].jQElement.$);
+			}
+		}
+		for (var i = 0; i < _blockData.length; i++) {
+			for (var j = 0; j < _blockData[i].length; j++) {
 				var neighbors = {
 					west : (j>0) ? blocks[i][j-1] : undefined,
 					northWest : (j>0 && i>0) ? blocks[i-1][j-1] : undefined,
 					north : (i>0) ? blocks[i-1][j] : undefined,
-					northEast : (i>0 && j<blockData[0].length-1) ? blocks[i-1][j+1] : undefined,
-					east : (j<blockData[0].length-1) ? blocks[i][j+1] : undefined,
-					southEast : (j<blockData[0].length-1 && i<blockData.length-1) ? blocks[i+1][j+1] : undefined,
-					south : (i<blockData.length-1) ? blocks[i+1][j] : undefined,
-					southWest : (j>0 && i<blockData.length-1) ? blocks[i+1][j-1] : undefined,
+					northEast : (i>0 && j<_blockData[0].length-1) ? blocks[i-1][j+1] : undefined,
+					east : (j<_blockData[0].length-1) ? blocks[i][j+1] : undefined,
+					southEast : (j<_blockData[0].length-1 && i<_blockData.length-1) ? blocks[i+1][j+1] : undefined,
+					south : (i<_blockData.length-1) ? blocks[i+1][j] : undefined,
+					southWest : (j>0 && i<_blockData.length-1) ? blocks[i+1][j-1] : undefined,
 				}
-				if(i==2&&j==3)console.log(neighbors)
 				blocks[i][j].setNeighbors( neighbors );
 			}
 		}
+		_$timer.text(0);
+		_$count.text(_numberOfMines);
 		_interval = setInterval(function(){
 			_seconds++;
-			console.log(_seconds);
+			_$timer.text(_seconds)
 		},1000);
 	}
-	this.gameover = function gameover(){
+	self.gameover = function gameover(){
 		for (var i = 0; i < blocks.length; i++) {
 			for (var j = 0; j < blocks[i].length; j++) {
 				blocks[i][j].gameover();
@@ -211,7 +292,7 @@ function Board(data, $container){
 		}
 		clearInterval(_interval);
 	}
-	this.open = function open(){
+	self.open = function open(){
 		_numberOfOpenedBlock++;
 		if( _numberOfOpenedBlock == _numberOfSafeBlock ){
 			alert('win');
@@ -223,8 +304,20 @@ function Board(data, $container){
 			}
 		}
 	}
-	this.mark = function mark(n){
+	self.mark = function mark(n){
 		_numberOfMarks+=n;
-		console.log('remain mines',  _numberOfMines-_numberOfMarks);
+		_$count.text(_numberOfMines-_numberOfMarks);
 	}
+	self.destroy = function destroy(){
+		_blockData = null;
+		clearInterval(_interval);
+		_$field.html('');
+	}
+	self.reset = function reset(){
+		self.destroy();
+		self.init(_config);
+	}
+	_$button.on('click', function(){
+		self.reset();
+	})
 }

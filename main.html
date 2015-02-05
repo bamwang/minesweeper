@@ -4,13 +4,62 @@
 	<script type="text/javascript" src="class.js"></script>
 	<script type="text/javascript" src="main.js"></script>
 	<style type="text/css">
-	div#board {
+	div#wrapper {
+	   width: 100%;
+	}
+	div#board #field {
 	    display: block;
-	    background: gray;
+	    background: #666;
 	    cursor: default;
 	    padding: 2px;
 	}
-	div#board:after   {  
+
+	div#board #bar{
+		height: 25px;
+		padding: 5px;
+		position: relative;
+		background: #666;
+	}
+	div#board #bar div{
+		display: block;
+	}
+	div#board #timer{
+		float: left;
+		position: absolute;
+		left: 4px;
+		top: 7px;
+	}
+	div#board #count{
+		float: right;
+		position: absolute;
+		right: 4px;
+		top: 7px;
+	}
+	div#board #timer,
+	div#board #count{
+		width: 40px;
+		text-align: center;
+		padding: 2px;
+		background: #ddd;
+		border-radius: 3px;
+	}
+	div#board #button{
+		/*float: left;*/
+		margin: auto;
+		width: 50px;
+		padding: 2px;
+		text-align: center;
+		background: #ddd;
+		border-bottom: #bbb 2px solid;
+		border-radius: 3px;
+		cursor:	pointer;
+	}
+
+	div#board{
+		margin: 0 auto;
+	}
+
+	.clearfix:after   {  
 	    content: ".";  
 	    display: block;  
 	    visibility: hidden;  
@@ -20,6 +69,7 @@
 	    clear: both;  
 	}
 
+
 	.block {
 	    display: block;
 	    width: 20px;
@@ -27,14 +77,83 @@
 	    margin: 2px;
 	    /*border: 1px solid black;*/
 	    float: left; 
-		background: #ddd;
+		background: #aaa;
 		border-radius: 2px;
+		/*color:white;*/
+	}
+	.block.open{
+		background-color: #ddd;
+	}
+	.block.mark{
+		background-color: gold;
+		background-image: url(flag.png);
+		background-size: 15px;
+		background-repeat: no-repeat;
+		background-position: center center;
+	}
+	.block.bomb{
+		background-color: red;
+	}
+	.block.n_1{
+		background-image: url(number.png);
+		background-size: 166px;
+		background-position: -18px;
+	}
+	.block.n_2{
+		background-image: url(number.png);
+		background-size: 166px;
+		background-position: -35px;
+	}
+	.block.n_3{
+		background-image: url(number.png);
+		background-size: 166px;
+		background-position: -54px;
+	}
+	.block.n_4{
+		background-image: url(number.png);
+		background-size: 166px;
+		background-position: -73px;
+	}
+	.block.n_5{
+		background-image: url(number.png);
+		background-size: 166px;
+		background-position: -90px;
+	}
+	.block.n_6{
+		background-image: url(number.png);
+		background-size: 166px;
+		background-position: -120px;
+	}
+	.block.n_7{
+		background-image: url(number.png);
+		background-size: 166px;
+		background-position: -140px;
+	}
+	.block.n_8{
+		background-image: url(number.png);
+		background-size: 166px;
+		background-position: -160px;
+	}
+	.block.n_-1{
+		background-image: url(mine.png);
+		background-size: 20;
+	}
+	.block.wrong{
+		background-image: url(wrong.png);
+		background-size: 20;
 	}
 	</style>
 </head>
 <body>
-	<div id="board">
-
+	<div id="wrapper" class="clearfix">
+		<div id="board" class="clearfix">
+			<div id="bar" class="clearfix">
+				<div id="timer"></div>
+				<div id="button">again</div>
+				<div id="count"></div>
+			</div>
+			<div id="field" class="clearfix"></div>
+		</div>
 	</div>
 </body>
 </html>
