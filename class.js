@@ -43,7 +43,7 @@ JQElement.prototype.removeHandler = function() {
 	var self = this;
 	self.$.off('contextmenu');
 	self.$.off('click');
-	self.$.on('contextmenu',function(){
+	self.$.on('contextmenu',function(event){
 		event.preventDefault();
 	});
 };
@@ -70,7 +70,7 @@ JQElement.prototype.assignLeftClickHandler = function(leftClickHandler, block) {
 }
 JQElement.prototype.assignRightClickHandler = function(rightClickHandler, block) {
 	var self = this;
-	self.$.on('contextmenu',function(){
+	self.$.on('contextmenu',function(event){
 		event.preventDefault();
 		rightClickHandler(block);
 	});
@@ -297,7 +297,7 @@ function Board($container){
 	self.open = function open(){
 		_numberOfOpenedBlock++;
 		if( _numberOfOpenedBlock == _numberOfSafeBlock ){
-			alert('win');
+			alert('You win!');
 			clearInterval(_interval);
 			for (var i = 0; i < blocks.length; i++) {
 				for (var j = 0; j < blocks[i].length; j++) {

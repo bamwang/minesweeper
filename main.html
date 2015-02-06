@@ -186,10 +186,10 @@
 	<div id="wrapper" class="clearfix">
 		<div id="controller" class="clearfix">
 			<form>
-				<input type="number" min="5" max="20" id="width" placeholder="width">
-				<input type="number" min="5" max="20" id="height" placeholder="height">
-				<input type="number" id="mines" placeholder="mine#">
-				<input type="submit" value="Go!">
+				<input type="number" min="5" max="20" id="width" placeholder="width" required>
+				<input type="number" min="5" max="20" id="height" placeholder="height" required>
+				<input type="number" id="mines" placeholder="mine#" required>
+				<input type="submit" value="Go!" formnovalidate>
 			</form>
 		</div>
 		<div id="board" class="clearfix">
