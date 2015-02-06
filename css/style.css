@@ -1,0 +1,176 @@
+body{
+	background: #eee;
+}
+div#wrapper {
+   width: 100%;
+}
+div#controller {
+    width: 340px;
+    display: block;
+    margin: 20px auto;
+}
+
+form input {
+    width: 80px;
+    text-align: center;
+    font-size: 20px;
+    line-height: 20px;
+    display: block;
+    float: left;
+	border-radius: 3px;
+    height: 27px;
+    background: #ddd;
+    border: none;
+    margin: 2px;
+}
+form input[type=submit]{
+	/*padding: 15px 40px;*/
+	/*font-size: 1.2em;*/
+	/*background-color: #000;*/
+	/*color: #fff;*/
+	border-style: none;
+	border-bottom: #bbb 2px solid;
+}
+div#board #field {
+    display: block;
+    background: #666;
+    cursor: default;
+    padding: 2px;
+}
+
+
+div#board #bar{
+	height: 25px;
+	padding: 5px;
+	position: relative;
+	background: #666;
+}
+div#board #bar div{
+	display: block;
+}
+div#board #timer{
+	float: left;
+	position: absolute;
+	left: 4px;
+	top: 7px;
+}
+div#board #count{
+	float: right;
+	position: absolute;
+	right: 4px;
+	top: 7px;
+}
+div#board #timer,
+div#board #count{
+	width: 40px;
+	text-align: center;
+	padding: 2px;
+	background: #ddd;
+	border-radius: 3px;
+}
+div#board #button{
+	margin: auto;
+	width: 24px;
+	padding: 2px;
+	text-align: center;
+	background: #ddd;
+	border-bottom: #bbb 2px solid;
+	border-radius: 3px;
+	cursor: pointer;
+	font-size: 20px;
+	line-height: 24px;
+	background-image: url(../img/face_normal.png);
+	background-size: 28px;
+	height: 24px;
+}
+div#board #button.over{
+	background-image: url(../img/face_over.png);
+}
+
+div#board{
+	margin: 0 auto;
+}
+
+.clearfix:after   {  
+    content: ".";  
+    display: block;  
+    visibility: hidden;  
+    height: 0.1px;  
+    font-size: 0.1em;  
+    line-height: 0;  
+    clear: both;  
+}
+
+
+.block {
+    display: block;
+    width: 20px;
+    height: 20px;
+    margin: 2px;
+    /*border: 1px solid black;*/
+    float: left; 
+	background: #aaa;
+	border-radius: 2px;
+	/*color:white;*/
+}
+.block.open{
+	background-color: #ddd;
+}
+.block.mark{
+	background-color: gold;
+	background-image: url(../img/flag.png);
+	background-size: 15px;
+	background-repeat: no-repeat;
+	background-position: center center;
+}
+.block.bomb{
+	background-color: red;
+}
+.block.n_1{
+	background-image: url(../img/number.png);
+	background-size: 166px;
+	background-position: -18px;
+}
+.block.n_2{
+	background-image: url(../img/number.png);
+	background-size: 166px;
+	background-position: -35px;
+}
+.block.n_3{
+	background-image: url(../img/number.png);
+	background-size: 166px;
+	background-position: -54px;
+}
+.block.n_4{
+	background-image: url(../img/number.png);
+	background-size: 166px;
+	background-position: -73px;
+}
+.block.n_5{
+	background-image: url(../img/number.png);
+	background-size: 166px;
+	background-position: -92px;
+}
+.block.n_6{
+	background-image: url(../img/number.png);
+	background-size: 166px;
+	background-position: -111px;
+}
+.block.n_7{
+	background-image: url(../img/number.png);
+	background-size: 166px;
+	background-position: -130px;
+}
+.block.n_8{
+	background-image: url(../img/number.png);
+	background-size: 166px;
+	background-position: -148px;
+}
+.block.n_-1{
+	background-image: url(../img/mine.png);
+	background-size: 20;
+}
+.block.wrong{
+	background-image: url(../img/wrong.png);
+	background-size: 20;
+}
